@@ -114,9 +114,7 @@ main {
   width: 46%;
   object-fit: cover;
   object-position: 50% 30%;
-  filter: grayscale(1) brightness(1.55) contrast(2.6);
-  mix-blend-mode: multiply;
-  clip-path: inset(9% 0% 0% 0%);
+  clip-path: inset(0% 0% 0% 0%);
   will-change: transform;
 }
 

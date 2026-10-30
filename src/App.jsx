@@ -171,7 +171,7 @@ export default function App() {
               <li>Times each response</li>
               <li>Keeps the error trace</li>
             </ul>
-            <img className="masthead-figure" src="/img/mercury.jpg" alt="Bronze statue of Mercury, messenger of the gods, by Giambologna" />
+            <img className="masthead-figure" src="/img/mercury.webp" alt="Bronze statue of Mercury, messenger of the gods, by Giambologna" />
             <p className="masthead-script" aria-hidden="true">the messenger</p>
             <h1>
               <span className="sr-only">Proxy monitor</span>
