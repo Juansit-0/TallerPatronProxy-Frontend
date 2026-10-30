@@ -227,7 +227,7 @@ main {
   font-family: var(--display);
 }
 
-.flow-wires line {
+.flow line {
   stroke: var(--red);
   stroke-width: 3;
   stroke-dasharray: 2 9;
@@ -236,6 +236,46 @@ main {
 
 .flow-node rect {
   fill: var(--paper);
+  transition: fill 0.3s var(--ease);
+}
+
+.flow-node text {
+  transition: fill 0.3s var(--ease);
+}
+
+.flow line {
+  transition: stroke-width 0.3s var(--ease), stroke-dasharray 0.3s var(--ease);
+}
+
+.flow-route {
+  cursor: default;
+}
+
+.flow-route:hover rect {
+  fill: var(--ink);
+}
+
+.flow-route:hover text {
+  fill: var(--paper);
+}
+
+.flow-route:hover line {
+  stroke-dasharray: none;
+  stroke-width: 4;
+}
+
+.flow-proxy .flow-hint {
+  font-family: var(--text);
+  font-size: 15px;
+  font-weight: 600;
+  text-transform: none;
+  fill: var(--ink);
+  opacity: 0;
+  transition: opacity 0.3s var(--ease);
+}
+
+.flow-proxy:hover .flow-hint {
+  opacity: 1;
 }
 
 .flow-node text,
@@ -370,7 +410,16 @@ h2 {
   display: grid;
   align-content: start;
   gap: 4px;
-  transition: background-color 0.5s var(--ease), color 0.5s var(--ease);
+  transition: background-color 0.5s var(--ease), color 0.5s var(--ease), transform 0.4s var(--ease);
+}
+
+.service:not(.skeleton, .is-failing):hover {
+  transform: translateY(-4px);
+  background: #e4dfd8;
+}
+
+.service:not(.skeleton):hover .service-total {
+  transform: translateX(6px);
 }
 
 .service h3 {
@@ -383,6 +432,7 @@ h2 {
 }
 
 .service-total {
+  transition: transform 0.4s var(--ease);
   font-family: var(--display);
   font-size: clamp(4.5rem, 7vw, 7rem);
   line-height: 1;
@@ -507,6 +557,13 @@ input {
   padding: 11px 12px;
   min-width: 170px;
   accent-color: var(--red);
+  caret-color: var(--red);
+  transition: background-color 0.2s var(--ease);
+}
+
+select:hover,
+input:hover {
+  background: #d6cfc6;
 }
 
 .table-wrap {
@@ -550,6 +607,32 @@ td {
 .log-row:hover,
 .log-row.is-open {
   background: var(--paper-2);
+}
+
+.log-row:focus-visible {
+  outline-offset: -3px;
+}
+
+.chevron {
+  width: 40px;
+}
+
+.chevron svg {
+  width: 20px;
+  height: 20px;
+  fill: none;
+  stroke: var(--red);
+  stroke-width: 2.5;
+  display: block;
+  transition: transform 0.35s var(--ease);
+}
+
+.log-row:hover .chevron svg {
+  transform: translateY(2px);
+}
+
+.log-row.is-open .chevron svg {
+  transform: rotate(180deg);
 }
 
 .status {
@@ -638,6 +721,12 @@ pre {
 .closing a {
   color: inherit;
   text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  transition: text-decoration-thickness 0.2s var(--ease);
+}
+
+.closing a:hover {
+  text-decoration-thickness: 3px;
 }
 
 .backend-status {

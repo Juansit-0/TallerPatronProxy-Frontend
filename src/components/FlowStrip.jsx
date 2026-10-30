@@ -11,14 +11,8 @@ export default function FlowStrip({ packets, onDone, pulse }) {
 
   return (
     <svg className="flow" viewBox="0 0 680 280" role="img" aria-label="Requests travel from the client through the LoggingProxy to each microservice and back">
-      <g className="flow-wires">
+      <g className="flow-node flow-route">
         <line x1={CLIENT.x + 50} y1={CLIENT.y} x2={PROXY.x - 80} y2={PROXY.y} />
-        {SERVICES.map((s) => (
-          <line key={s.id} x1={PROXY.x + 80} y1={PROXY.y} x2={SERVICE_X - 70} y2={TARGETS[s.id]} />
-        ))}
-      </g>
-
-      <g className="flow-node">
         <rect x={CLIENT.x - 50} y={CLIENT.y - 34} width="100" height="68" />
         <text x={CLIENT.x} y={CLIENT.y + 8}>Client</text>
       </g>
@@ -39,10 +33,14 @@ export default function FlowStrip({ packets, onDone, pulse }) {
         <rect x={PROXY.x - 80} y={PROXY.y - 50} width="160" height="100" />
         <text x={PROXY.x} y={PROXY.y - 4}>Logging</text>
         <text x={PROXY.x} y={PROXY.y + 30}>Proxy</text>
+        <text className="flow-hint" x={PROXY.x} y={PROXY.y - 68}>
+          Logs, times and audits every call
+        </text>
       </g>
 
       {SERVICES.map((s) => (
-        <g key={s.id} className="flow-node">
+        <g key={s.id} className="flow-node flow-route">
+          <line x1={PROXY.x + 80} y1={PROXY.y} x2={SERVICE_X - 70} y2={TARGETS[s.id]} />
           <rect x={SERVICE_X - 70} y={TARGETS[s.id] - 30} width="140" height="60" />
           <text x={SERVICE_X} y={TARGETS[s.id] + 8}>{s.name}</text>
         </g>

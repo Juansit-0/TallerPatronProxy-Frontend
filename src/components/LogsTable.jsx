@@ -54,13 +54,16 @@ export default function LogsTable({ logs, loaded, filters, onFilters, onPage }) 
               <th scope="col" className="num">Duration</th>
               <th scope="col">Status</th>
               <th scope="col">Time</th>
+              <th scope="col">
+                <span className="sr-only">Details</span>
+              </th>
             </tr>
           </thead>
           <tbody>
-            {!loaded && <RowsSkeleton columns={6} />}
+            {!loaded && <RowsSkeleton columns={7} />}
             {loaded && logs.content.length === 0 && (
               <tr>
-                <td colSpan="6" className="empty">No calls match. Press Simulate load to send 50 requests through the proxy.</td>
+                <td colSpan="7" className="empty">No calls match. Press Simulate load to send 50 requests through the proxy.</td>
               </tr>
             )}
             <AnimatePresence initial={false}>
@@ -84,10 +87,15 @@ export default function LogsTable({ logs, loaded, filters, onFilters, onPage }) 
                       <span className={`status status-${log.status.toLowerCase()}`}>{log.status}</span>
                     </td>
                     <td>{time(log.timestamp)}</td>
+                    <td className="chevron">
+                      <svg viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M6 9l6 6 6-6" />
+                      </svg>
+                    </td>
                   </motion.tr>
                   {open === log.requestId && (
                     <tr className="log-detail">
-                      <td colSpan="6">
+                      <td colSpan="7">
                         <motion.div
                           className="detail-grid"
                           initial={{ opacity: 0, y: -8 }}
