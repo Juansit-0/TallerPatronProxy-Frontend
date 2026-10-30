@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { motion } from 'motion/react'
+import { MotionConfig, motion } from 'motion/react'
 import { API_URL, getLogs, getSummary, simulateLoad } from './api'
 import { SERVICES } from './services'
 import Asterisk from './components/Asterisk'
@@ -74,80 +74,100 @@ export default function App() {
   const dateParts = [today.getDate(), today.getMonth() + 1, today.getFullYear() % 100].map((n) => String(n).padStart(2, '0'))
 
   return (
-    <div className="poster">
-      <header className="grid">
-        <motion.div className="tile masthead" {...rise(0)}>
-          <h1>
-            <span className="masthead-word">Proxy</span>
-            <span className="masthead-sub">monitor</span>
-          </h1>
-        </motion.div>
-        <motion.div className="tile flow-tile" {...rise(0.08)}>
-          <FlowStrip packets={packets} pulse={ticks} onDone={(id) => setPackets((current) => current.filter((p) => p.id !== id))} />
-        </motion.div>
-      </header>
-
-      <main>
-        <section className="grid" aria-labelledby="services-title">
-          <motion.div className="tile intro" {...rise(0.16)}>
-            <h2 id="services-title">Every call passes the proxy</h2>
-            <p>
-              Inventory, Orders and Payments never answer directly. A LoggingProxy wraps each one, times the call, records the
-              result and keeps the error trace when something breaks.
-            </p>
-            <button type="button" className="button" onClick={runLoad} disabled={simulating}>
-              {simulating ? 'Sending 50 calls' : 'Simulate load'}
-            </button>
-            <p className={`live ${failure ? 'is-down' : ''}`} role="status">
-              {failure ?? (updatedAt ? `Live, polled every 3 seconds. Last update ${updatedAt.toLocaleTimeString()}` : 'Connecting to the backend')}
-            </p>
-          </motion.div>
-          <div className="services">
-            {SERVICES.map((s, i) => (
-              <motion.div key={s.id} className="service-slot" {...rise(0.22 + i * 0.07)}>
-                <ServiceCard service={s} stats={statsFor(s.id)} />
-              </motion.div>
-            ))}
-          </div>
-        </section>
-
-        <section className="grid" aria-labelledby="chart-title">
-          <motion.div className="tile chart-tile" {...rise(0.1)}>
-            <h2 id="chart-title">Last 20 calls per service</h2>
-            <p className="tile-note">Response time in milliseconds. Red squares are calls that failed inside the service.</p>
-            <LatencyChart summary={summary} />
-          </motion.div>
-          <motion.div className="tile date-tile" {...rise(0.18)}>
-            <p className="date-stack" aria-label={`Today, ${today.toLocaleDateString()}`}>
-              {dateParts.map((part, i) => (
-                <span key={i}>{part}</span>
-              ))}
-            </p>
-            <Asterisk turns={ticks} className="asterisk" />
-          </motion.div>
-        </section>
-
-        <section className="grid" aria-labelledby="logs-title">
-          <motion.div className="tile logs-tile" {...rise(0.1)}>
-            <h2 id="logs-title">Audit log</h2>
-            <p className="tile-note">Click a row to see the input params and the full response or error.</p>
-            <LogsTable
-              logs={logs}
-              filters={filters}
-              onFilters={(next) => {
-                setFilters(next)
-                setPage(0)
-              }}
-              onPage={setPage}
+    <MotionConfig reducedMotion="user">
+      <div className="poster">
+        <header className="grid">
+          <motion.div className="tile masthead" {...rise(0)}>
+            <p className="stamp">Audited</p>
+            <ul className="marginalia" aria-hidden="true">
+              <li>Intercepts every call</li>
+              <li>Times each response</li>
+              <li>Keeps the error trace</li>
+            </ul>
+            <motion.img
+              className="masthead-figure"
+              src="/img/mercury.jpg"
+              alt="Bronze statue of Mercury, messenger of the gods, by Giambologna"
+              animate={{ y: [0, -10, 0] }}
+              transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
             />
+            <p className="masthead-script" aria-hidden="true">the messenger</p>
+            <h1>
+              <span className="masthead-word">Proxy</span>
+              <span className="masthead-sub">monitor</span>
+            </h1>
           </motion.div>
-        </section>
-      </main>
+          <motion.div className="tile flow-tile" {...rise(0.08)}>
+            <FlowStrip packets={packets} pulse={ticks} onDone={(id) => setPackets((current) => current.filter((p) => p.id !== id))} />
+          </motion.div>
+        </header>
 
-      <footer className="closing">
-        <p className="closing-word">Logging proxy</p>
-        <p className="closing-note">Taller Patron Proxy. Spring Boot backend, React frontend.</p>
-      </footer>
-    </div>
+        <main>
+          <section className="grid" aria-labelledby="services-title">
+            <motion.div className="tile intro" {...rise(0.16)}>
+              <h2 id="services-title">Every call passes the proxy</h2>
+              <p>
+                Inventory, Orders and Payments never answer directly. A LoggingProxy wraps each one, times the call, records the
+                result and keeps the error trace when something breaks.
+              </p>
+              <button type="button" className="button" onClick={runLoad} disabled={simulating}>
+                {simulating ? 'Sending 50 calls' : 'Simulate load'}
+              </button>
+              <p className={`live ${failure ? 'is-down' : ''}`} role="status">
+                {failure ?? (updatedAt ? `Live, polled every 3 seconds. Last update ${updatedAt.toLocaleTimeString()}` : 'Connecting to the backend')}
+              </p>
+            </motion.div>
+            <div className="services">
+              {SERVICES.map((s, i) => (
+                <motion.div key={s.id} className="service-slot" {...rise(0.22 + i * 0.07)}>
+                  <ServiceCard service={s} stats={statsFor(s.id)} />
+                </motion.div>
+              ))}
+            </div>
+          </section>
+
+          <section className="grid" aria-labelledby="chart-title">
+            <motion.div className="tile chart-tile" {...rise(0.1)}>
+              <h2 id="chart-title">Last 20 calls per service</h2>
+              <p className="tile-note">Response time in milliseconds. Red squares are calls that failed inside the service.</p>
+              <LatencyChart summary={summary} />
+            </motion.div>
+            <motion.div className="tile date-tile" {...rise(0.18)}>
+              <p className="date-stack" aria-label={`Today, ${today.toLocaleDateString()}`}>
+                {dateParts.map((part, i) => (
+                  <span key={i}>{part}</span>
+                ))}
+              </p>
+              <Asterisk turns={ticks} className="asterisk" />
+            </motion.div>
+          </section>
+
+          <section className="grid" aria-labelledby="logs-title">
+            <motion.div className="tile logs-tile" {...rise(0.1)}>
+              <h2 id="logs-title">Audit log</h2>
+              <p className="tile-note">Click a row to see the input params and the full response or error.</p>
+              <LogsTable
+                logs={logs}
+                filters={filters}
+                onFilters={(next) => {
+                  setFilters(next)
+                  setPage(0)
+                }}
+                onPage={setPage}
+              />
+            </motion.div>
+          </section>
+        </main>
+
+        <footer className="closing">
+          <p className="closing-word">Logging proxy</p>
+          <p className="closing-note">Taller Patron Proxy. Spring Boot backend, React frontend.</p>
+          <p className="closing-note">
+            Like Mercury, the proxy carries every message and answers for it. Image: "Mercury" by Giambologna, public domain (CC0),{' '}
+            <a href="https://www.metmuseum.org/art/collection/search/205648">The Metropolitan Museum of Art</a>.
+          </p>
+        </footer>
+      </div>
+    </MotionConfig>
   )
 }

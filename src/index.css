@@ -6,10 +6,11 @@
   --ink: #2a0b0c;
   --ink-soft: #5a2a2b;
   --ok: #2e7d4f;
-  --fail: #c8102e;
+  --fail: #e0261b;
   --gap: 10px;
   --pad: clamp(18px, 2.4vw, 32px);
   --display: 'Anton', 'Impact', sans-serif;
+  --serif: 'Bodoni Moda', 'Didot', serif;
   --text: 'Poppins', system-ui, sans-serif;
   --ease: cubic-bezier(0.16, 1, 0.3, 1);
   --grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
@@ -95,24 +96,83 @@ main {
 }
 
 .masthead {
-  grid-column: span 5;
+  grid-column: span 7;
   display: flex;
   align-items: flex-end;
-  min-height: 330px;
+  min-height: 460px;
+}
+
+.masthead-figure {
+  position: absolute;
+  top: -4%;
+  right: 2%;
+  height: 112%;
+  width: 46%;
+  object-fit: cover;
+  object-position: 50% 30%;
+  filter: grayscale(1) brightness(1.55) contrast(2.6);
+  mix-blend-mode: multiply;
+  -webkit-mask-image: radial-gradient(closest-side, #000 72%, transparent);
+  mask-image: radial-gradient(closest-side, #000 72%, transparent);
+}
+
+.masthead-script {
+  position: absolute;
+  right: 3%;
+  top: 30%;
+  max-width: 44%;
+  text-align: right;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 700;
+  font-size: clamp(2.6rem, 4.6vw, 4.8rem);
+  line-height: 0.9;
+  color: var(--red);
+  mix-blend-mode: multiply;
+  transform: rotate(-8deg);
+  pointer-events: none;
+}
+
+.stamp {
+  position: absolute;
+  top: var(--pad);
+  left: var(--pad);
+  padding: 4px 10px;
+  font-family: var(--display);
+  font-size: 18px;
+  text-transform: uppercase;
+  color: var(--red);
+  outline: 3px solid var(--red);
+  outline-offset: -3px;
+  transform: rotate(-4deg);
+}
+
+.marginalia {
+  position: absolute;
+  top: var(--pad);
+  right: var(--pad);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 12px;
+  line-height: 1.5;
+  text-align: right;
+  color: var(--ink-soft);
 }
 
 .masthead::before {
   content: '';
   position: absolute;
-  inset: 0 0 0 38%;
+  inset: 0 50% 0 0;
   background-image: var(--halftone);
   opacity: 0.22;
-  -webkit-mask-image: linear-gradient(100deg, transparent, #000 70%);
-  mask-image: linear-gradient(100deg, transparent, #000 70%);
+  -webkit-mask-image: linear-gradient(80deg, #000, transparent 75%);
+  mask-image: linear-gradient(80deg, #000, transparent 75%);
 }
 
 .masthead h1 {
   position: relative;
+  z-index: 1;
   display: grid;
   color: var(--red);
   font-family: var(--display);
@@ -134,7 +194,7 @@ main {
 }
 
 .flow-tile {
-  grid-column: span 7;
+  grid-column: span 5;
   display: grid;
   place-items: center;
   background: var(--paper-2);
@@ -552,11 +612,17 @@ pre {
 .closing-note {
   margin-top: 18px;
   font-size: 14px;
+  max-width: 70ch;
+}
+
+.closing a {
+  color: inherit;
+  text-underline-offset: 3px;
 }
 
 @keyframes alarm {
   50% {
-    background-color: #a80c26;
+    background-color: #b8160f;
   }
 }
 
@@ -581,7 +647,7 @@ pre {
   }
 
   .masthead {
-    min-height: 0;
+    min-height: 420px;
   }
 
   .date-tile {
@@ -591,6 +657,22 @@ pre {
 }
 
 @media (max-width: 720px) {
+  .masthead-figure {
+    width: 62%;
+    right: -6%;
+  }
+
+  .marginalia {
+    display: none;
+  }
+
+  .masthead-script {
+    top: 24%;
+    right: 4%;
+    max-width: 60%;
+    font-size: 2.6rem;
+  }
+
   .services {
     grid-template-columns: 1fr;
   }
