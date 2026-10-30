@@ -50,7 +50,7 @@ export default function FlowStrip({ packets, onDone, pulse }) {
         {!reduceMotion &&
           packets.map((p) => {
             const y = TARGETS[p.service]
-            const back = p.status === 'ERROR' ? '#c8102e' : '#2e7d4f'
+            const back = p.status === 'ERROR' ? '#c41d14' : '#276b43'
             return (
               <motion.circle
                 key={p.id}

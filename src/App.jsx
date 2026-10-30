@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { Suspense, lazy, useCallback, useEffect, useRef, useState } from 'react'
 import { MotionConfig } from 'motion/react'
 import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
@@ -7,7 +7,6 @@ import { API_URL, getLogs, getSummary, simulateLoad } from './api'
 import { SERVICES } from './services'
 import Asterisk from './components/Asterisk'
 import FlowStrip from './components/FlowStrip'
-import LatencyChart from './components/LatencyChart'
 import LogsTable from './components/LogsTable'
 import ServiceCard from './components/ServiceCard'
 import BackendStatus, { Spinner } from './components/BackendStatus'
@@ -21,10 +20,16 @@ const GIVE_UP_MS = 60000
 
 gsap.registerPlugin(useGSAP, ScrollTrigger)
 
-const letters = (word) =>
-  word.split('').map((char, i) => (
-    <span key={i} className="char">
-      {char}
+const LatencyChart = lazy(() => import('./components/LatencyChart'))
+
+const letters = (text) =>
+  text.split(' ').map((word, w) => (
+    <span key={w} className="word">
+      {word.split('').map((char, i) => (
+        <span key={i} className="char">
+          {char}
+        </span>
+      ))}
     </span>
   ))
 
@@ -215,7 +220,7 @@ export default function App() {
             <div className="tile chart-tile" data-reveal>
               <h2 id="chart-title">Last 20 calls per service</h2>
               <p className="tile-note">Response time in milliseconds. Red squares are calls that failed inside the service.</p>
-              {loaded ? <LatencyChart summary={summary} /> : <ChartSkeleton />}
+              <Suspense fallback={<ChartSkeleton />}>{loaded ? <LatencyChart summary={summary} /> : <ChartSkeleton />}</Suspense>
             </div>
             <div className="tile date-tile" data-reveal>
               <p className="date-stack" aria-label={`Today, ${today.toLocaleDateString()}`}>

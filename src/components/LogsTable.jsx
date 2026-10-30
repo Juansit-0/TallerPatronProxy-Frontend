@@ -79,14 +79,14 @@ export default function LogsTable({ logs, loaded, filters, onFilters, onPage }) 
                     onClick={() => toggle(log.requestId)}
                     onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && (e.preventDefault(), toggle(log.requestId))}
                   >
-                    <td title={log.requestId}>{log.requestId.slice(0, 8)}</td>
-                    <td>{log.serviceId}</td>
-                    <td>{log.operation}</td>
-                    <td className="num">{log.durationMs} ms</td>
-                    <td>
+                    <td data-label="Request ID" title={log.requestId}>{log.requestId.slice(0, 8)}</td>
+                    <td data-label="Service">{log.serviceId}</td>
+                    <td data-label="Operation">{log.operation}</td>
+                    <td data-label="Duration" className="num">{log.durationMs} ms</td>
+                    <td data-label="Status">
                       <span className={`status status-${log.status.toLowerCase()}`}>{log.status}</span>
                     </td>
-                    <td>{time(log.timestamp)}</td>
+                    <td data-label="Time">{time(log.timestamp)}</td>
                     <td className="chevron">
                       <svg viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M6 9l6 6 6-6" />

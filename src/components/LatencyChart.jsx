@@ -19,7 +19,7 @@ function toRows(summary) {
 function StatusDot({ cx, cy, payload, dataKey, stroke }) {
   if (cx == null || cy == null || payload[dataKey] == null) return null
   if (payload[`${dataKey}Status`] === 'ERROR') {
-    return <rect x={cx - 6} y={cy - 6} width="12" height="12" fill="#c8102e" />
+    return <rect x={cx - 6} y={cy - 6} width="12" height="12" fill="#c41d14" />
   }
   return <circle cx={cx} cy={cy} r="3.5" fill={stroke} />
 }

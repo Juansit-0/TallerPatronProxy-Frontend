@@ -5,8 +5,13 @@
   --paper-2: #e0dbd3;
   --ink: #2a0b0c;
   --ink-soft: #5a2a2b;
-  --ok: #2e7d4f;
-  --fail: #e0261b;
+  --ok: #276b43;
+  --fail: #c41d14;
+  --fail-deep: #a3160f;
+  --paper-3: #e4dfd8;
+  --paper-4: #d6cfc6;
+  --veil: rgb(0 0 0 / 0.18);
+  --stripe: rgb(140 28 30 / 0.04);
   --gap: 10px;
   --pad: clamp(18px, 2.4vw, 32px);
   --display: 'Anton', 'Impact', sans-serif;
@@ -31,7 +36,7 @@ html {
 
 body {
   margin: 0;
-  min-height: 100vh;
+  min-height: 100svh;
   background: var(--red);
   color: var(--ink);
   font-family: var(--text);
@@ -45,8 +50,7 @@ body::after {
   position: fixed;
   inset: 0;
   background-image: var(--grain);
-  mix-blend-mode: multiply;
-  opacity: 0.32;
+  opacity: 0.2;
   pointer-events: none;
   z-index: 10;
 }
@@ -112,8 +116,8 @@ main {
   object-position: 50% 30%;
   filter: grayscale(1) brightness(1.55) contrast(2.6);
   mix-blend-mode: multiply;
-  -webkit-mask-image: radial-gradient(closest-side, #000 72%, transparent);
-  mask-image: radial-gradient(closest-side, #000 72%, transparent);
+  clip-path: inset(9% 0% 0% 0%);
+  will-change: transform;
 }
 
 .masthead-script {
@@ -149,25 +153,24 @@ main {
 
 .marginalia {
   position: absolute;
-  top: var(--pad);
+  z-index: 1;
+  bottom: var(--pad);
   right: var(--pad);
+  text-align: right;
   margin: 0;
   padding: 0;
   list-style: none;
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.5;
-  text-align: right;
   color: var(--ink-soft);
 }
 
 .masthead::before {
   content: '';
   position: absolute;
-  inset: 0 50% 0 0;
+  inset: 0 52% 46% 0;
   background-image: var(--halftone);
-  opacity: 0.22;
-  -webkit-mask-image: linear-gradient(80deg, #000, transparent 75%);
-  mask-image: linear-gradient(80deg, #000, transparent 75%);
+  opacity: 0.16;
 }
 
 .masthead h1 {
@@ -190,9 +193,18 @@ main {
   white-space: nowrap;
 }
 
+.word {
+  display: inline-block;
+  white-space: nowrap;
+  margin-right: 0.22em;
+}
+
+.word:last-child {
+  margin-right: 0;
+}
+
 .char {
   display: inline-block;
-  white-space: pre;
 }
 
 .closing-word > span[aria-hidden],
@@ -244,7 +256,7 @@ main {
 }
 
 .flow line {
-  transition: stroke-width 0.3s var(--ease), stroke-dasharray 0.3s var(--ease);
+  transition: stroke 0.3s var(--ease);
 }
 
 .flow-route {
@@ -260,8 +272,8 @@ main {
 }
 
 .flow-route:hover line {
+  stroke: var(--ink);
   stroke-dasharray: none;
-  stroke-width: 4;
 }
 
 .flow-proxy .flow-hint {
@@ -354,6 +366,7 @@ h2 {
 }
 
 .button-quiet {
+  min-height: 44px;
   padding: 12px 16px;
   background: var(--paper-2);
   color: var(--ink);
@@ -370,11 +383,11 @@ h2 {
 }
 
 .live {
-  font-size: 14px;
+  font-size: 16px;
   color: var(--ink-soft);
   display: flex;
   gap: 10px;
-  align-items: center;
+  align-items: flex-start;
 }
 
 .live::before {
@@ -383,6 +396,7 @@ h2 {
   width: 10px;
   height: 10px;
   border-radius: 50%;
+  margin-top: 0.5em;
   background: var(--ok);
   animation: blink 3s var(--ease) infinite;
 }
@@ -415,7 +429,7 @@ h2 {
 
 .service:not(.skeleton, .is-failing):hover {
   transform: translateY(-4px);
-  background: #e4dfd8;
+  background: var(--paper-3);
 }
 
 .service:not(.skeleton):hover .service-total {
@@ -441,7 +455,7 @@ h2 {
 }
 
 .service-caption {
-  font-size: 14px;
+  font-size: 16px;
   color: var(--ink-soft);
 }
 
@@ -460,7 +474,7 @@ h2 {
 }
 
 .service-stats dt {
-  font-size: 14px;
+  font-size: 16px;
 }
 
 .service-stats dd {
@@ -472,7 +486,6 @@ h2 {
 .service-alert {
   margin-top: 14px;
   font-weight: 600;
-  font-size: 14px;
 }
 
 .service.is-failing {
@@ -487,7 +500,7 @@ h2 {
 }
 
 .service.is-failing .service-stats div {
-  background: rgb(0 0 0 / 0.18);
+  background: var(--veil);
 }
 
 .chart-tile {
@@ -496,7 +509,7 @@ h2 {
 
 .tile-note {
   margin: 8px 0 18px;
-  font-size: 14px;
+  font-size: 16px;
   color: var(--ink-soft);
 }
 
@@ -543,13 +556,13 @@ h2 {
 .filters label {
   display: grid;
   gap: 6px;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 600;
 }
 
 select,
 input {
-  font: 500 15px var(--text);
+  font: 500 16px var(--text);
   color: var(--ink);
   background: var(--paper-2);
   border: 0;
@@ -563,7 +576,7 @@ input {
 
 select:hover,
 input:hover {
-  background: #d6cfc6;
+  background: var(--paper-4);
 }
 
 .table-wrap {
@@ -573,7 +586,7 @@ input:hover {
 table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 15px;
+  font-size: 16px;
   font-variant-numeric: tabular-nums;
 }
 
@@ -601,7 +614,7 @@ td {
 }
 
 .log-row:nth-child(even) {
-  background: rgb(140 28 30 / 0.04);
+  background: var(--stripe);
 }
 
 .log-row:hover,
@@ -696,7 +709,6 @@ pre {
   justify-content: space-between;
   gap: 12px;
   margin-top: 18px;
-  font-size: 14px;
 }
 
 .closing {
@@ -714,7 +726,7 @@ pre {
 
 .closing-note {
   margin-top: 18px;
-  font-size: 14px;
+  font-size: 16px;
   max-width: 70ch;
 }
 
@@ -850,7 +862,7 @@ pre {
 
 @keyframes alarm {
   50% {
-    background-color: #b8160f;
+    background-color: var(--fail-deep);
   }
 }
 
@@ -914,14 +926,64 @@ pre {
   .pager {
     flex-wrap: wrap;
   }
+
+  table thead {
+    display: none;
+  }
+
+  .log-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    padding: 10px 0;
+  }
+
+  .log-row td {
+    display: grid;
+    justify-items: start;
+    gap: 2px;
+    padding: 6px 14px;
+  }
+
+  .log-row td::before {
+    content: attr(data-label);
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--ink-soft);
+  }
+
+  .log-row .chevron {
+    width: auto;
+  }
+
+  .log-row .chevron::before {
+    content: none;
+  }
+
+  .log-detail,
+  .log-detail td {
+    display: block;
+  }
+
+  tr.skeleton td:nth-child(n + 4) {
+    display: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *,
-  *::before,
-  *::after {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
+  .service.is-failing,
+  .live::before,
+  .skeleton .sk {
+    animation: none;
+  }
+
+  .spinner {
+    animation-duration: 3s;
+  }
+
+  .button:hover:not(:disabled),
+  .service:not(.skeleton, .is-failing):hover,
+  .service:not(.skeleton):hover .service-total,
+  .log-row:hover .chevron svg {
+    transform: none;
   }
 }
