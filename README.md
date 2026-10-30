@@ -22,3 +22,8 @@ VITE_API_URL=http://localhost:8080 npm run dev
 ```
 
 `VITE_API_URL` points to the Spring Boot backend.
+
+## Production
+
+- Frontend (Vercel): https://taller-patron-proxy-frontend-theta.vercel.app
+- Backend (Railway): https://taller-patron-proxy-production.up.railway.app/api/metrics/summary
