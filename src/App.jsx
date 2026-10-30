@@ -7,10 +7,14 @@ import FlowStrip from './components/FlowStrip'
 import LatencyChart from './components/LatencyChart'
 import LogsTable from './components/LogsTable'
 import ServiceCard from './components/ServiceCard'
+import BackendStatus, { Spinner } from './components/BackendStatus'
+import { CardSkeleton, ChartSkeleton } from './components/Skeleton'
 
 const EMPTY_STATS = { totalCalls: 0, successRate: 0, errorRate: 0, avgDurationMs: 0, recent: [] }
 const EMPTY_LOGS = { content: [], page: 0, totalPages: 1, totalElements: 0 }
 const POLL_MS = 3000
+const WAKE_AFTER_MS = 4000
+const GIVE_UP_MS = 60000
 
 const rise = (delay = 0) => ({
   initial: { opacity: 0, y: 28 },
@@ -26,11 +30,18 @@ export default function App() {
   const [packets, setPackets] = useState([])
   const [ticks, setTicks] = useState(0)
   const [updatedAt, setUpdatedAt] = useState(null)
-  const [failure, setFailure] = useState(null)
+  const [phase, setPhase] = useState('connecting')
+  const [elapsed, setElapsed] = useState(0)
+  const [loaded, setLoaded] = useState(false)
+  const [loadError, setLoadError] = useState(null)
   const [simulating, setSimulating] = useState(false)
   const seen = useRef(null)
+  const inFlight = useRef(false)
+  const startedAt = useRef(Date.now())
 
   const refresh = useCallback(async () => {
+    if (inFlight.current) return
+    inFlight.current = true
     try {
       const [nextSummary, nextLogs] = await Promise.all([getSummary(), getLogs(filters, page)])
       const recent = nextSummary.flatMap((s) => s.recent.map((r) => ({ ...r, service: s.serviceId })))
@@ -45,9 +56,12 @@ export default function App() {
       setSummary(nextSummary)
       setLogs(nextLogs)
       setUpdatedAt(new Date())
-      setFailure(null)
+      setLoaded(true)
+      setPhase('ready')
     } catch {
-      setFailure(`Can't reach the backend at ${API_URL}. Retrying every 3 seconds.`)
+      setPhase((current) => (current !== 'ready' && Date.now() - startedAt.current < GIVE_UP_MS ? 'waking' : 'down'))
+    } finally {
+      inFlight.current = false
     }
   }, [filters, page])
 
@@ -57,13 +71,24 @@ export default function App() {
     return () => clearInterval(timer)
   }, [refresh])
 
+  useEffect(() => {
+    if (phase === 'ready') return
+    const timer = setInterval(() => {
+      const ms = Date.now() - startedAt.current
+      setElapsed(Math.round(ms / 1000))
+      if (ms >= WAKE_AFTER_MS) setPhase((current) => (current === 'connecting' ? 'waking' : current))
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [phase])
+
   async function runLoad() {
     setSimulating(true)
+    setLoadError(null)
     try {
       await simulateLoad()
       await refresh()
     } catch {
-      setFailure('The load simulation failed. Check that the backend is running.')
+      setLoadError('The load simulation failed. Check that the backend is running and try again.')
     } finally {
       setSimulating(false)
     }
@@ -76,6 +101,7 @@ export default function App() {
   return (
     <MotionConfig reducedMotion="user">
       <div className="poster">
+        <BackendStatus phase={phase} elapsed={elapsed} onRetry={refresh} />
         <header className="grid">
           <motion.div className="tile masthead" {...rise(0)}>
             <p className="stamp">Audited</p>
@@ -110,17 +136,21 @@ export default function App() {
                 Inventory, Orders and Payments never answer directly. A LoggingProxy wraps each one, times the call, records the
                 result and keeps the error trace when something breaks.
               </p>
-              <button type="button" className="button" onClick={runLoad} disabled={simulating}>
+              <button type="button" className="button" onClick={runLoad} disabled={simulating || !loaded}>
+                {simulating && <Spinner />}
                 {simulating ? 'Sending 50 calls' : 'Simulate load'}
               </button>
-              <p className={`live ${failure ? 'is-down' : ''}`} role="status">
-                {failure ?? (updatedAt ? `Live, polled every 3 seconds. Last update ${updatedAt.toLocaleTimeString()}` : 'Connecting to the backend')}
+              <p className={`live ${loadError || phase === 'down' ? 'is-down' : ''} ${phase === 'ready' ? '' : 'is-waiting'}`} role="status">
+                {loadError ??
+                  (phase === 'ready' && updatedAt
+                    ? `Live, polled every 3 seconds. Last update ${updatedAt.toLocaleTimeString()}`
+                    : `Waiting for the backend at ${API_URL}`)}
               </p>
             </motion.div>
             <div className="services">
               {SERVICES.map((s, i) => (
                 <motion.div key={s.id} className="service-slot" {...rise(0.22 + i * 0.07)}>
-                  <ServiceCard service={s} stats={statsFor(s.id)} />
+                  {loaded ? <ServiceCard service={s} stats={statsFor(s.id)} /> : <CardSkeleton />}
                 </motion.div>
               ))}
             </div>
@@ -130,7 +160,7 @@ export default function App() {
             <motion.div className="tile chart-tile" {...rise(0.1)}>
               <h2 id="chart-title">Last 20 calls per service</h2>
               <p className="tile-note">Response time in milliseconds. Red squares are calls that failed inside the service.</p>
-              <LatencyChart summary={summary} />
+              {loaded ? <LatencyChart summary={summary} /> : <ChartSkeleton />}
             </motion.div>
             <motion.div className="tile date-tile" {...rise(0.18)}>
               <p className="date-stack" aria-label={`Today, ${today.toLocaleDateString()}`}>
@@ -148,6 +178,7 @@ export default function App() {
               <p className="tile-note">Click a row to see the input params and the full response or error.</p>
               <LogsTable
                 logs={logs}
+                loaded={loaded}
                 filters={filters}
                 onFilters={(next) => {
                   setFilters(next)

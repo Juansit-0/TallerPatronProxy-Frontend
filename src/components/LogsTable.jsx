@@ -1,11 +1,12 @@
 import { Fragment, useState } from 'react'
 import { AnimatePresence, motion } from 'motion/react'
 import { SERVICES } from '../services'
+import { RowsSkeleton } from './Skeleton'
 
 const time = (iso) => new Date(iso).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
 const json = (value) => JSON.stringify(value, null, 2)
 
-export default function LogsTable({ logs, filters, onFilters, onPage }) {
+export default function LogsTable({ logs, loaded, filters, onFilters, onPage }) {
   const [open, setOpen] = useState(null)
   const set = (key) => (e) => onFilters({ ...filters, [key]: e.target.value })
   const toggle = (id) => setOpen(open === id ? null : id)
@@ -56,7 +57,8 @@ export default function LogsTable({ logs, filters, onFilters, onPage }) {
             </tr>
           </thead>
           <tbody>
-            {logs.content.length === 0 && (
+            {!loaded && <RowsSkeleton columns={6} />}
+            {loaded && logs.content.length === 0 && (
               <tr>
                 <td colSpan="6" className="empty">No calls match. Press Simulate load to send 50 requests through the proxy.</td>
               </tr>
