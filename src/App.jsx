@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
-import { MotionConfig, motion } from 'motion/react'
+import { MotionConfig } from 'motion/react'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { useGSAP } from '@gsap/react'
 import { API_URL, getLogs, getSummary, simulateLoad } from './api'
 import { SERVICES } from './services'
 import Asterisk from './components/Asterisk'
@@ -16,11 +19,14 @@ const POLL_MS = 3000
 const WAKE_AFTER_MS = 4000
 const GIVE_UP_MS = 60000
 
-const rise = (delay = 0) => ({
-  initial: { opacity: 0, y: 28 },
-  animate: { opacity: 1, y: 0 },
-  transition: { duration: 0.7, delay, ease: [0.16, 1, 0.3, 1] },
-})
+gsap.registerPlugin(useGSAP, ScrollTrigger)
+
+const letters = (word) =>
+  word.split('').map((char, i) => (
+    <span key={i} className="char">
+      {char}
+    </span>
+  ))
 
 export default function App() {
   const [summary, setSummary] = useState([])
@@ -38,6 +44,52 @@ export default function App() {
   const seen = useRef(null)
   const inFlight = useRef(false)
   const startedAt = useRef(Date.now())
+  const root = useRef(null)
+
+  useGSAP(
+    () => {
+      const mm = gsap.matchMedia()
+      mm.add('(prefers-reduced-motion: no-preference)', () => {
+        gsap
+          .timeline({ defaults: { ease: 'expo.out' } })
+          .from('.masthead-word .char', { yPercent: 105, duration: 1.2, stagger: 0.07 })
+          .from('.masthead-sub', { x: -40, autoAlpha: 0, duration: 0.9 }, 0.35)
+          .from('.masthead-figure', { clipPath: 'inset(100% 0% 0% 0%)', duration: 1.6, ease: 'power4.inOut' }, 0.1)
+          .from('.masthead-script', { autoAlpha: 0, y: 40, rotation: -24, duration: 1.2 }, 0.9)
+          .from('.stamp', { autoAlpha: 0, scale: 2, rotation: -20, duration: 0.7, ease: 'back.out(2.5)' }, 1.1)
+          .from('.marginalia li', { autoAlpha: 0, x: 20, duration: 0.6, stagger: 0.08 }, 1.2)
+          .from('.flow-tile', { autoAlpha: 0, y: 32, duration: 1 }, 0.2)
+          .from('.flow-node, .flow-proxy', { autoAlpha: 0, scale: 0.8, transformOrigin: '50% 50%', duration: 0.6, stagger: 0.08 }, 0.6)
+
+        gsap.to('.masthead-figure', { y: -12, duration: 3.6, ease: 'sine.inOut', yoyo: true, repeat: -1, delay: 1.8 })
+
+        gsap.utils.toArray('[data-reveal]').forEach((tile) => {
+          gsap
+            .timeline({ scrollTrigger: { trigger: tile, start: 'top 88%', once: true }, defaults: { ease: 'expo.out' } })
+            .from(tile, { autoAlpha: 0, y: 36, duration: 0.9 })
+            .from(tile.children, { autoAlpha: 0, y: 24, duration: 0.7, stagger: 0.07 }, 0.12)
+        })
+
+        gsap.from('.service-slot', {
+          autoAlpha: 0,
+          y: 48,
+          duration: 1,
+          stagger: 0.09,
+          ease: 'expo.out',
+          scrollTrigger: { trigger: '.services', start: 'top 88%', once: true },
+        })
+
+        gsap.from('.closing-word .char', {
+          yPercent: 105,
+          duration: 1.1,
+          stagger: 0.04,
+          ease: 'expo.out',
+          scrollTrigger: { trigger: '.closing', start: 'top 92%', once: true },
+        })
+      })
+    },
+    { scope: root },
+  )
 
   const refresh = useCallback(async () => {
     if (inFlight.current) return
@@ -72,6 +124,10 @@ export default function App() {
   }, [refresh])
 
   useEffect(() => {
+    ScrollTrigger.refresh()
+  }, [loaded])
+
+  useEffect(() => {
     if (phase === 'ready') return
     const timer = setInterval(() => {
       const ms = Date.now() - startedAt.current
@@ -100,37 +156,36 @@ export default function App() {
 
   return (
     <MotionConfig reducedMotion="user">
-      <div className="poster">
+      <div className="poster" ref={root}>
         <BackendStatus phase={phase} elapsed={elapsed} onRetry={refresh} />
         <header className="grid">
-          <motion.div className="tile masthead" {...rise(0)}>
+          <div className="tile masthead">
             <p className="stamp">Audited</p>
             <ul className="marginalia" aria-hidden="true">
               <li>Intercepts every call</li>
               <li>Times each response</li>
               <li>Keeps the error trace</li>
             </ul>
-            <motion.img
-              className="masthead-figure"
-              src="/img/mercury.jpg"
-              alt="Bronze statue of Mercury, messenger of the gods, by Giambologna"
-              animate={{ y: [0, -10, 0] }}
-              transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
-            />
+            <img className="masthead-figure" src="/img/mercury.jpg" alt="Bronze statue of Mercury, messenger of the gods, by Giambologna" />
             <p className="masthead-script" aria-hidden="true">the messenger</p>
             <h1>
-              <span className="masthead-word">Proxy</span>
-              <span className="masthead-sub">monitor</span>
+              <span className="sr-only">Proxy monitor</span>
+              <span className="masthead-word" aria-hidden="true">
+                {letters('Proxy')}
+              </span>
+              <span className="masthead-sub" aria-hidden="true">
+                monitor
+              </span>
             </h1>
-          </motion.div>
-          <motion.div className="tile flow-tile" {...rise(0.08)}>
+          </div>
+          <div className="tile flow-tile">
             <FlowStrip packets={packets} pulse={ticks} onDone={(id) => setPackets((current) => current.filter((p) => p.id !== id))} />
-          </motion.div>
+          </div>
         </header>
 
         <main>
           <section className="grid" aria-labelledby="services-title">
-            <motion.div className="tile intro" {...rise(0.16)}>
+            <div className="tile intro" data-reveal>
               <h2 id="services-title">Every call passes the proxy</h2>
               <p>
                 Inventory, Orders and Payments never answer directly. A LoggingProxy wraps each one, times the call, records the
@@ -146,34 +201,34 @@ export default function App() {
                     ? `Live, polled every 3 seconds. Last update ${updatedAt.toLocaleTimeString()}`
                     : `Waiting for the backend at ${API_URL}`)}
               </p>
-            </motion.div>
+            </div>
             <div className="services">
-              {SERVICES.map((s, i) => (
-                <motion.div key={s.id} className="service-slot" {...rise(0.22 + i * 0.07)}>
+              {SERVICES.map((s) => (
+                <div key={s.id} className="service-slot">
                   {loaded ? <ServiceCard service={s} stats={statsFor(s.id)} /> : <CardSkeleton />}
-                </motion.div>
+                </div>
               ))}
             </div>
           </section>
 
           <section className="grid" aria-labelledby="chart-title">
-            <motion.div className="tile chart-tile" {...rise(0.1)}>
+            <div className="tile chart-tile" data-reveal>
               <h2 id="chart-title">Last 20 calls per service</h2>
               <p className="tile-note">Response time in milliseconds. Red squares are calls that failed inside the service.</p>
               {loaded ? <LatencyChart summary={summary} /> : <ChartSkeleton />}
-            </motion.div>
-            <motion.div className="tile date-tile" {...rise(0.18)}>
+            </div>
+            <div className="tile date-tile" data-reveal>
               <p className="date-stack" aria-label={`Today, ${today.toLocaleDateString()}`}>
                 {dateParts.map((part, i) => (
                   <span key={i}>{part}</span>
                 ))}
               </p>
               <Asterisk turns={ticks} className="asterisk" />
-            </motion.div>
+            </div>
           </section>
 
           <section className="grid" aria-labelledby="logs-title">
-            <motion.div className="tile logs-tile" {...rise(0.1)}>
+            <div className="tile logs-tile" data-reveal>
               <h2 id="logs-title">Audit log</h2>
               <p className="tile-note">Click a row to see the input params and the full response or error.</p>
               <LogsTable
@@ -186,12 +241,15 @@ export default function App() {
                 }}
                 onPage={setPage}
               />
-            </motion.div>
+            </div>
           </section>
         </main>
 
         <footer className="closing">
-          <p className="closing-word">Logging proxy</p>
+          <p className="closing-word">
+            <span className="sr-only">Logging proxy</span>
+            <span aria-hidden="true">{letters('Logging proxy')}</span>
+          </p>
           <p className="closing-note">Taller Patron Proxy. Spring Boot backend, React frontend.</p>
           <p className="closing-note">
             Like Mercury, the proxy carries every message and answers for it. Image: "Mercury" by Giambologna, public domain (CC0),{' '}

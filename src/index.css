@@ -181,6 +181,26 @@ main {
   line-height: 0.82;
 }
 
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.char {
+  display: inline-block;
+  white-space: pre;
+}
+
+.closing-word > span[aria-hidden],
+.masthead-word {
+  display: block;
+  clip-path: inset(-0.3em -0.2em 0 -0.2em);
+}
+
 .masthead-word {
   font-size: clamp(6.5rem, 13.6vw, 13.5rem);
   letter-spacing: -0.02em;
